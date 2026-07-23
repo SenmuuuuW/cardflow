@@ -2,7 +2,21 @@
 
 ## Status
 
-Recommendation for approval only. This document does not initialize a framework, select a hosting vendor, or define a final database schema.
+**Approved for Phase 0.**
+
+P0-01 authorizes the application foundation below. It does not configure a database, select an authentication or storage provider, select a deployment provider, or define a final database schema.
+
+## Approved Phase 0 Technical Baseline
+
+- Next.js with the App Router and React.
+- TypeScript in strict mode.
+- pnpm as the package manager.
+- Tailwind CSS.
+- A modular-monolith structure, with the browser UI and future server-owned boundaries in one application.
+- PostgreSQL as the approved future relational database and Drizzle ORM as the approved future database layer. Neither is configured in P0-01.
+- S3-compatible object storage behind a future server-owned adapter. No storage provider is selected or integrated in P0-01.
+
+The authentication provider, object-storage provider, deployment provider, and final hosting region remain explicitly deferred. The China Wi-Fi and 5G test remains the gate for final deployment and media-path decisions.
 
 ## Context
 
@@ -28,7 +42,7 @@ The final deployment and media path must be selected only after the Phase 0 Chin
 
 One responsive web application contains the browser UI and a server-side application boundary. PostgreSQL holds relational business data and audit records. An S3-compatible object store holds high-resolution images and future video evidence; browsers upload directly through server-issued, short-lived upload permissions rather than sending large files through the application server.
 
-An implementation could use a mature full-stack TypeScript framework such as Next.js, PostgreSQL, and an ORM/query layer. The exact framework, ORM, authentication provider, app host, database host, and storage vendor remain open.
+Phase 0 uses Next.js with the App Router, React, strict TypeScript, pnpm, and Tailwind CSS. PostgreSQL and Drizzle ORM are approved for the future relational layer but are not configured in P0-01. The authentication provider, app host, database host, object-storage provider, and final deployment region remain open.
 
 ### Option B: Browser app with a managed backend-as-a-service
 
@@ -113,7 +127,7 @@ Test these on actual warehouse Wi-Fi and 5G before starting Phase 1 workflow wor
 
 The guide does not supply enough evidence to make these choices now:
 
-1. The application, authentication, database, and object-storage providers and their deployment regions.
+1. The application-hosting, authentication, PostgreSQL-hosting, and object-storage providers and their deployment regions.
 2. The outcome of the China Wi-Fi and 5G trial, including which endpoint fails if a result is unacceptable.
 3. The exact authentication and account-provisioning method for the administrator and warehouse users.
 4. Final database fields, indexes, migration details, and data-retention policies.
@@ -125,4 +139,4 @@ The guide does not supply enough evidence to make these choices now:
 
 ## Consequences of approval
 
-Once this recommendation is approved, the next work is Phase 0 only: establish the repository and quality gates, set up authentication and the two roles, build the minimum persistent/upload foundation, and run the China connectivity test before implementing the operational workflow.
+The baseline is approved only for P0-01. Quality gates, authentication and roles, persistence, uploads, and the China connectivity test remain separate Phase 0 tasks and must precede operational workflow development.

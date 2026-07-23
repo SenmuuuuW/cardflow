@@ -48,7 +48,43 @@ Each phase must pass lint, typecheck, and tests. State-machine, permissions, and
 
 ## Local development
 
-Local development is not initialized yet. This section will be completed after the proposed architecture and Phase 0 plan are approved.
+### Prerequisites
+
+- Node.js 20.9 or later.
+- pnpm 10.34.5 or later.
+
+### Install
+
+```bash
+pnpm install
+```
+
+### Development server
+
+```bash
+pnpm dev
+```
+
+### Production build
+
+```bash
+pnpm build
+```
+
+### Environment setup
+
+```bash
+cp .env.example .env.local
+```
+
+P0-01 does not require runtime environment values. Database, authentication, object-storage, deployment, and final-region configuration remain deferred.
+
+### Baseline checks
+
+```bash
+pnpm lint
+pnpm typecheck
+```
 
 ## Documentation
 
