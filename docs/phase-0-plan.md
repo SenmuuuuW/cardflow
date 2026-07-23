@@ -31,6 +31,8 @@ Phase 0 exit gate: a China warehouse user must complete the login/list and ten-i
 
 **Objective:** Make linting, type checking, and automated tests runnable from the start.
 
+**Approved testing decision:** Vitest runs pure tests in its default `node` environment. Its configuration resolves `@/` to `src/`; browser-testing adapters are not part of P0-02.
+
 **Expected files or areas:** Linter, formatter if selected, TypeScript configuration, test-runner configuration, package scripts, and a minimal test fixture.
 
 **Acceptance criteria:**
