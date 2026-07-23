@@ -65,10 +65,19 @@ pnpm install
 pnpm dev
 ```
 
-### Production build
+### Quality checks
 
 ```bash
+pnpm lint
+pnpm typecheck
+pnpm test
 pnpm build
+```
+
+### Test watch mode
+
+```bash
+pnpm test:watch
 ```
 
 ### Environment setup
@@ -79,12 +88,9 @@ cp .env.example .env.local
 
 P0-01 does not require runtime environment values. Database, authentication, object-storage, deployment, and final-region configuration remain deferred.
 
-### Baseline checks
+### Continuous integration
 
-```bash
-pnpm lint
-pnpm typecheck
-```
+`.github/workflows/ci.yml` runs `pnpm lint`, `pnpm typecheck`, `pnpm test`, and `pnpm build` for pushes to `main` and pull requests targeting `main`.
 
 ## Documentation
 

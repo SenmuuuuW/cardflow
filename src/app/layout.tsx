@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
+import { cardflowProject } from "@/lib/cardflow-project";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "CardFlow",
-  description: "Phase 0 application foundation for CardFlow.",
+  title: cardflowProject.name,
+  description: cardflowProject.metadataDescription,
 };
 
 export default function RootLayout({
