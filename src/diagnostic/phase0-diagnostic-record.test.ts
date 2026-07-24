@@ -1,10 +1,20 @@
 import { describe, expect, it } from "vitest";
 
 import {
-  phase0DiagnosticRawRecord,
   toPhase0DiagnosticAdministratorRecord,
+  toPhase0DiagnosticRecordsForRole,
   toPhase0DiagnosticWarehouseRecord,
+  type Phase0DiagnosticRawRecord,
 } from "./phase0-diagnostic-record";
+
+const rawDiagnosticRecord: Phase0DiagnosticRawRecord = {
+  id: "00000000-0000-4000-8000-0000000000a1",
+  itemLabel: "Diagnostic Card Alpha (Mock)",
+  expectedQuantity: 1,
+  statusLabel: "Phase 0 diagnostic only",
+  purchaseCostCents: 1_250,
+  purchaseCurrency: "USD",
+};
 
 function hasKeyAtAnyDepth(value: unknown, key: string): boolean {
   if (!value || typeof value !== "object") {
@@ -25,25 +35,25 @@ function hasKeyAtAnyDepth(value: unknown, key: string): boolean {
 
 describe("Phase 0 diagnostic response shapes", () => {
   it("allows administrators to receive the approved purchase-cost fields", () => {
-    expect(toPhase0DiagnosticAdministratorRecord(phase0DiagnosticRawRecord)).toEqual({
-      id: "phase0-diagnostic-record",
-      itemLabel: "Phase 0 diagnostic card record",
+    expect(toPhase0DiagnosticAdministratorRecord(rawDiagnosticRecord)).toEqual({
+      id: "00000000-0000-4000-8000-0000000000a1",
+      itemLabel: "Diagnostic Card Alpha (Mock)",
       expectedQuantity: 1,
-      statusLabel: "Diagnostic only",
-      purchaseCostCents: 12_500,
+      statusLabel: "Phase 0 diagnostic only",
+      purchaseCostCents: 1_250,
       purchaseCurrency: "USD",
     });
   });
 
   it("uses an explicit warehouse allow-list when raw diagnostic data gains sensitive fields", () => {
     const rawRecordWithAdditionalSensitiveFields = {
-      id: phase0DiagnosticRawRecord.id,
-      itemLabel: phase0DiagnosticRawRecord.itemLabel,
-      expectedQuantity: phase0DiagnosticRawRecord.expectedQuantity,
-      statusLabel: phase0DiagnosticRawRecord.statusLabel,
-      purchaseCostCents: phase0DiagnosticRawRecord.purchaseCostCents,
-      purchaseCurrency: phase0DiagnosticRawRecord.purchaseCurrency,
-      internalProcurementReference: phase0DiagnosticRawRecord.internalProcurementReference,
+      id: rawDiagnosticRecord.id,
+      itemLabel: rawDiagnosticRecord.itemLabel,
+      expectedQuantity: rawDiagnosticRecord.expectedQuantity,
+      statusLabel: rawDiagnosticRecord.statusLabel,
+      purchaseCostCents: rawDiagnosticRecord.purchaseCostCents,
+      purchaseCurrency: rawDiagnosticRecord.purchaseCurrency,
+      internalProcurementReference: "synthetic internal reference",
       futureProcurementMetadata: {
         purchaseCostCents: 9_999,
         purchaseCurrency: "USD",
@@ -56,14 +66,25 @@ describe("Phase 0 diagnostic response shapes", () => {
     const serializedWarehouseRecord = JSON.parse(JSON.stringify(warehouseRecord)) as unknown;
 
     expect(warehouseRecord).toEqual({
-      id: "phase0-diagnostic-record",
-      itemLabel: "Phase 0 diagnostic card record",
+      id: "00000000-0000-4000-8000-0000000000a1",
+      itemLabel: "Diagnostic Card Alpha (Mock)",
       expectedQuantity: 1,
-      statusLabel: "Diagnostic only",
+      statusLabel: "Phase 0 diagnostic only",
     });
     expect(hasKeyAtAnyDepth(serializedWarehouseRecord, "purchaseCostCents")).toBe(false);
     expect(hasKeyAtAnyDepth(serializedWarehouseRecord, "purchaseCurrency")).toBe(false);
     expect(hasKeyAtAnyDepth(serializedWarehouseRecord, "internalProcurementReference")).toBe(false);
     expect(hasKeyAtAnyDepth(serializedWarehouseRecord, "futureProcurementMetadata")).toBe(false);
+  });
+
+  it("maps a diagnostic list without widening the warehouse response shape", () => {
+    expect(toPhase0DiagnosticRecordsForRole("china_warehouse", [rawDiagnosticRecord])).toEqual([
+      {
+        id: "00000000-0000-4000-8000-0000000000a1",
+        itemLabel: "Diagnostic Card Alpha (Mock)",
+        expectedQuantity: 1,
+        statusLabel: "Phase 0 diagnostic only",
+      },
+    ]);
   });
 });

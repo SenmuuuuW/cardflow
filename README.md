@@ -103,9 +103,29 @@ Provisioned users sign in at `/login`; `/diagnostic` is the only protected Phase
 
 ### P0-05 permission boundary
 
-The Phase 0 diagnostic API has one server-only authorization boundary. `GET /api/diagnostic/record` requires a valid authenticated session and maps its deterministic non-production diagnostic fixture into an explicit role-safe response. Administrators receive the approved purchase-cost fields; China warehouse responses construct a separate allow-list shape that omits purchase-cost and internal procurement fields entirely.
+The Phase 0 diagnostic API has one server-only authorization boundary. `GET /api/diagnostic/records` requires a valid authenticated session and maps the persisted non-production diagnostic records into explicit role-safe response shapes. Administrators receive the approved purchase-cost fields; China warehouse responses construct a separate allow-list shape that omits purchase-cost and internal procurement fields entirely.
 
 `POST /api/diagnostic/administrator-probe` requires the persisted `administrator` role. The server resolves the current role from the authenticated Better Auth session and PostgreSQL record for every request; it ignores claimed roles in browser state, cookies, headers, query parameters, and request bodies. Protected diagnostic responses use `401` for unauthenticated callers, `403` for authenticated callers without permission, and `Cache-Control: private, no-store`. These diagnostic records are not a final business model.
+
+### Controlled Phase 0 mock data
+
+P0-06 adds the provisional `phase0_diagnostic_records` table and seed-ownership ledgers. They are not purchase orders, inventory, or workflow tables and may be removed or replaced after Phase 0. The seed uses three fixed synthetic records: Diagnostic Card Alpha, Beta, and Gamma (Mock).
+
+Set synthetic local-only values for the six `PHASE0_*` variables in `.env.local`, then run the seed after applying the development migration:
+
+```bash
+pnpm db:seed:phase0
+```
+
+The command provisions one administrator and one China warehouse account through the existing server-only provisioning service, reconciles the three stable diagnostic IDs, and is safe to rerun. It preserves an existing account's role, display name, and password; a conflicting existing role stops the command. It logs only account statuses and diagnostic record IDs, never passwords or secrets.
+
+Reset only the same controlled data with:
+
+```bash
+pnpm db:reset:phase0
+```
+
+Reset uses the configured Phase 0 email addresses and seed-ownership ledgers to remove only seed-owned accounts, their Better Auth account/session rows, and the three deterministic diagnostic records. It preserves unrelated users and records, is safe to rerun, and never drops schemas or Docker volumes. Both seed and reset refuse production-like environments and require a local development or test database URL; neither runs automatically in production.
 
 ### Local database
 
@@ -146,7 +166,7 @@ pnpm db:test
 
 ### Continuous integration
 
-`.github/workflows/ci.yml` runs `pnpm lint`, `pnpm typecheck`, database-free `pnpm test`, a clean PostgreSQL test migration, `pnpm db:test` including authentication integration coverage, and `pnpm build` for pushes to `main` and pull requests targeting `main`. It uses only test-local PostgreSQL and test-only authentication environment values.
+`.github/workflows/ci.yml` runs `pnpm lint`, `pnpm typecheck`, database-free `pnpm test`, a clean PostgreSQL test migration, `pnpm db:test` including authentication, seed/reset, and authorization integration coverage, and `pnpm build` for pushes to `main` and pull requests targeting `main`. It uses only test-local PostgreSQL and test-only authentication environment values.
 
 ## Documentation
 

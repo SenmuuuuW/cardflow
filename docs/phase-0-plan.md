@@ -109,6 +109,8 @@ Phase 0 exit gate: a China warehouse user must complete the login/list and ten-i
 
 **Objective:** Provide repeatable non-production records for role, list, and upload tests without starting the full business workflow.
 
+**P0-06 implementation decision:** `phase0_diagnostic_records` holds three fixed synthetic records with stable IDs, positive quantities, non-negative costs, and a narrow diagnostic-only currency representation. `phase0_diagnostic_seed_accounts` and `phase0_diagnostic_seed_records` record only accounts and records created by the server-only seed process so reset can remove only seed-owned rows and Better Auth account/session rows. The seed reconciles fixed records and preserves existing account roles and passwords; a role conflict or unowned fixed record ID fails closed. The role-safe diagnostic list remains server-derived, explicitly mapped, and cost-free for warehouse responses. Seed and reset refuse production-like environments, require a local development or test database URL, and introduce no operational model.
+
 **Expected files or areas:** Seed scripts or fixtures; test-data documentation; development reset command; minimal read-only test endpoint or server query.
 
 **Acceptance criteria:**
@@ -117,6 +119,7 @@ Phase 0 exit gate: a China warehouse user must complete the login/list and ten-i
 - The administrator test data can verify purchase-cost visibility; warehouse fixtures and responses omit that data.
 - Mock data is clearly labeled and cannot be confused with operational inventory.
 - The test list contains only the minimum data needed for connectivity verification.
+- Reset removes only seed-owned accounts and deterministic diagnostic records, while preserving unrelated users and records.
 
 **Dependencies:** P0-03 through P0-05.
 
