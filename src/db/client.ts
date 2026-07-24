@@ -46,3 +46,14 @@ export function getDatabaseConnection(): DatabaseConnection {
 export function getDatabase(): CardflowDatabase {
   return getDatabaseConnection().db;
 }
+
+export async function closeDatabaseConnection(): Promise<void> {
+  const connection = globalThis.cardflowDatabaseConnection;
+
+  if (!connection) {
+    return;
+  }
+
+  globalThis.cardflowDatabaseConnection = undefined;
+  await connection.close();
+}
