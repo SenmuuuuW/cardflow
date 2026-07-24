@@ -90,6 +90,8 @@ Phase 0 exit gate: a China warehouse user must complete the login/list and ten-i
 
 **Objective:** Prove that permission enforcement and purchase-cost exclusion occur before data reaches the warehouse browser.
 
+**P0-05 implementation decision:** A small server-only authorization layer validates the Better Auth session and resolves the current persisted PostgreSQL role for each protected request. It exposes explicit authenticated, role, and administrator guards with stable `401` unauthenticated and `403` forbidden responses. The non-production Phase 0 diagnostic record has separate explicit administrator and warehouse response mappers; warehouse responses are an allow-list and never serialize purchase-cost or internal procurement fields. Query parameters, request bodies, headers, cookies, and browser state never supply an authoritative role.
+
 **Expected files or areas:** Server authorization policy/module; protected query/service layer; role-specific response types; authorization tests; mock protected records.
 
 **Acceptance criteria:**
