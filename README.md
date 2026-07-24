@@ -101,6 +101,12 @@ The command prompts for an email, display name, role, and masked password. It ca
 
 Provisioned users sign in at `/login`; `/diagnostic` is the only protected Phase 0 surface and shows the server-resolved display name and role. CI uses a test-only Better Auth secret and URL, while database tests create ephemeral accounts at runtime. No real credentials are committed.
 
+### P0-05 permission boundary
+
+The Phase 0 diagnostic API has one server-only authorization boundary. `GET /api/diagnostic/record` requires a valid authenticated session and maps its deterministic non-production diagnostic fixture into an explicit role-safe response. Administrators receive the approved purchase-cost fields; China warehouse responses construct a separate allow-list shape that omits purchase-cost and internal procurement fields entirely.
+
+`POST /api/diagnostic/administrator-probe` requires the persisted `administrator` role. The server resolves the current role from the authenticated Better Auth session and PostgreSQL record for every request; it ignores claimed roles in browser state, cookies, headers, query parameters, and request bodies. Protected diagnostic responses use `401` for unauthenticated callers, `403` for authenticated callers without permission, and `Cache-Control: private, no-store`. These diagnostic records are not a final business model.
+
 ### Local database
 
 Start the local PostgreSQL service and apply the development migration:

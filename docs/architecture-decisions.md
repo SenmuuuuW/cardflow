@@ -24,6 +24,12 @@ Better Auth is used with its bundled Drizzle adapter, the existing PostgreSQL da
 
 CardFlow remains invitation/provisioning-only: public sign-up is disabled, no public registration page exists, and a server-only command provisions the initial administrator and China warehouse accounts. The command is idempotent and preserves an existing account's display name, role, and password. The PostgreSQL `user_role` enum remains limited to `administrator` and `china_warehouse`; roles are never read from browser input or Better Auth session output. A server-only helper validates the session and reads the current role from `users` for every protected request.
 
+## P0-05 Authorization and Response-Shaping Decision
+
+Protected Phase 0 routes use one small server-only authorization layer over the P0-04 trusted session helper. It distinguishes unauthenticated (`401`) from authenticated-but-forbidden (`403`) requests without returning session, database, credential, or protected-record details. It accepts no client-provided role claim from browser state, query parameters, request bodies, headers, or cookies.
+
+The Phase 0 diagnostic record is a deterministic non-production fixture, not a purchase-order or final business record. Its raw server-only representation includes purchase-cost and internal procurement data. Response mappers construct administrator and China warehouse shapes explicitly: the administrator shape may contain the approved purchase-cost fields, while the warehouse shape is a literal allow-list that omits those fields completely, including from nested data and error responses. Protected diagnostic responses are non-cacheable. This boundary is covered with Better Auth and PostgreSQL-backed integration tests; no schema or CI change is required for P0-05.
+
 ## Context
 
 CardFlow is a small internal web system for one US administrator and one or two China warehouse employees. Its expected design capacity is about 50 cards per day. The system must preserve a continuous evidence chain from purchase through bulk shipment, but it is not an e-commerce storefront, customer-order fulfillment tool, or general ERP.
