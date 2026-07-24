@@ -50,7 +50,7 @@ Each phase must pass lint, typecheck, and tests. State-machine, permissions, and
 
 ### Prerequisites
 
-- Node.js 20.9 or later.
+- Node.js 22 or later.
 - pnpm 10.34.5 or later.
 - Docker Desktop with Docker Compose for the local PostgreSQL databases.
 
@@ -87,7 +87,19 @@ pnpm test:watch
 cp .env.example .env.local
 ```
 
-P0-01 did not require runtime environment values. P0-03 adds local-only PostgreSQL connection values; authentication, object storage, deployment, and final-region choices remain deferred.
+P0-03 adds local-only PostgreSQL connection values. P0-04 adds Better Auth configuration: generate a unique local `BETTER_AUTH_SECRET` with `openssl rand -base64 32`, place the output only in `.env.local`, and keep `BETTER_AUTH_URL` at `http://localhost:3000` for local development. HTTP is accepted only for loopback development; a hosted deployment must use HTTPS before secure cookies can be issued. Object storage, deployment provider, and final region remain deferred.
+
+### Authentication and provisioning
+
+CardFlow is invitation/provisioning-only. There is no public registration page, and the Better Auth sign-up endpoint is disabled. Provision each initial account through the server-only command after applying the development migration:
+
+```bash
+pnpm provision:phase0-user
+```
+
+The command prompts for an email, display name, role, and masked password. It can instead read `CARDFLOW_PROVISION_EMAIL`, `CARDFLOW_PROVISION_DISPLAY_NAME`, `CARDFLOW_PROVISION_ROLE`, and `CARDFLOW_PROVISION_PASSWORD` from the environment. Use the command once for `administrator` and once for `china_warehouse`. Re-running it for an existing email preserves the stored display name, role, and password rather than changing them.
+
+Provisioned users sign in at `/login`; `/diagnostic` is the only protected Phase 0 surface and shows the server-resolved display name and role. CI uses a test-only Better Auth secret and URL, while database tests create ephemeral accounts at runtime. No real credentials are committed.
 
 ### Local database
 
@@ -128,7 +140,7 @@ pnpm db:test
 
 ### Continuous integration
 
-`.github/workflows/ci.yml` runs `pnpm lint`, `pnpm typecheck`, database-free `pnpm test`, a clean PostgreSQL test migration, `pnpm db:test`, and `pnpm build` for pushes to `main` and pull requests targeting `main`.
+`.github/workflows/ci.yml` runs `pnpm lint`, `pnpm typecheck`, database-free `pnpm test`, a clean PostgreSQL test migration, `pnpm db:test` including authentication integration coverage, and `pnpm build` for pushes to `main` and pull requests targeting `main`. It uses only test-local PostgreSQL and test-only authentication environment values.
 
 ## Documentation
 

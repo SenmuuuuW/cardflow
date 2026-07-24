@@ -4,7 +4,7 @@
 
 **Approved for Phase 0.**
 
-P0-01 authorizes the application foundation below. It does not configure a database, select an authentication or storage provider, select a deployment provider, or define a final database schema.
+P0-01 authorizes the application foundation below. P0-03 adds the approved local PostgreSQL/Drizzle persistence foundation, and P0-04 selects Better Auth for the initial invitation-only authentication path. Object storage, deployment provider, final hosting region, and the final production schema remain deferred.
 
 ## Approved Phase 0 Technical Baseline
 
@@ -16,7 +16,13 @@ P0-01 authorizes the application foundation below. It does not configure a datab
 - PostgreSQL as the approved future relational database and Drizzle ORM as the approved future database layer. Neither is configured in P0-01.
 - S3-compatible object storage behind a future server-owned adapter. No storage provider is selected or integrated in P0-01.
 
-The authentication provider, object-storage provider, deployment provider, and final hosting region remain explicitly deferred. The China Wi-Fi and 5G test remains the gate for final deployment and media-path decisions.
+Better Auth is selected for P0-04. The object-storage provider, deployment provider, and final hosting region remain explicitly deferred. The China Wi-Fi and 5G test remains the gate for final deployment and media-path decisions.
+
+## P0-04 Authentication Decision
+
+Better Auth is used with its bundled Drizzle adapter, the existing PostgreSQL database, email/password credentials, and database-backed sessions. It is configured for secure HTTP-only, `SameSite=Lax` cookies when the base URL uses HTTPS; HTTP is accepted only for local loopback development.
+
+CardFlow remains invitation/provisioning-only: public sign-up is disabled, no public registration page exists, and a server-only command provisions the initial administrator and China warehouse accounts. The command is idempotent and preserves an existing account's display name, role, and password. The PostgreSQL `user_role` enum remains limited to `administrator` and `china_warehouse`; roles are never read from browser input or Better Auth session output. A server-only helper validates the session and reads the current role from `users` for every protected request.
 
 ## Context
 
@@ -42,7 +48,7 @@ The final deployment and media path must be selected only after the Phase 0 Chin
 
 One responsive web application contains the browser UI and a server-side application boundary. PostgreSQL holds relational business data and audit records. An S3-compatible object store holds high-resolution images and future video evidence; browsers upload directly through server-issued, short-lived upload permissions rather than sending large files through the application server.
 
-Phase 0 uses Next.js with the App Router, React, strict TypeScript, pnpm, and Tailwind CSS. PostgreSQL and Drizzle ORM are approved for the future relational layer but are not configured in P0-01. The authentication provider, app host, database host, object-storage provider, and final deployment region remain open.
+Phase 0 uses Next.js with the App Router, React, strict TypeScript, pnpm, and Tailwind CSS. PostgreSQL and Drizzle ORM provide the local relational layer, and Better Auth provides the initial invitation-only authentication path. The app host, database host, object-storage provider, and final deployment region remain open.
 
 ### Option B: Browser app with a managed backend-as-a-service
 
@@ -127,9 +133,9 @@ Test these on actual warehouse Wi-Fi and 5G before starting Phase 1 workflow wor
 
 The guide does not supply enough evidence to make these choices now:
 
-1. The application-hosting, authentication, PostgreSQL-hosting, and object-storage providers and their deployment regions.
+1. The application-hosting, PostgreSQL-hosting, and object-storage providers and their deployment regions.
 2. The outcome of the China Wi-Fi and 5G trial, including which endpoint fails if a result is unacceptable.
-3. The exact authentication and account-provisioning method for the administrator and warehouse users.
+3. Account recovery, credential rotation, and any authentication method beyond the P0-04 email/password provisioning path.
 4. Final database fields, indexes, migration details, and data-retention policies.
 5. Accepted image/video formats, size or duration limits, storage lifecycle, and evidence-retention requirements.
 6. The exact idempotency-key lifetime, upload-intent cleanup behavior, and how a client proves that a retry represents the same logical file.
@@ -139,4 +145,4 @@ The guide does not supply enough evidence to make these choices now:
 
 ## Consequences of approval
 
-The baseline is approved only for P0-01. Quality gates, authentication and roles, persistence, uploads, and the China connectivity test remain separate Phase 0 tasks and must precede operational workflow development.
+The baseline is approved through P0-04 for the application, quality-gate, persistence, and initial authentication foundations. Uploads and the China connectivity test remain separate Phase 0 tasks and must precede operational workflow development.

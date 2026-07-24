@@ -71,6 +71,8 @@ Phase 0 exit gate: a China warehouse user must complete the login/list and ten-i
 
 **Objective:** Establish authenticated sessions and server-derived `administrator` and `china_warehouse` roles.
 
+**P0-04 implementation decision:** Better Auth uses the existing PostgreSQL/Drizzle foundation for email/password credential accounts and database-backed sessions. The existing `users` table remains the application-user table and preserves the two-value PostgreSQL role enum. Only a server-only provisioning command creates accounts; public sign-up is disabled. The session helper validates the Better Auth session, then reads the persisted CardFlow role for every request. HTTPS deployments use secure HTTP-only cookies; local loopback development uses the necessary HTTP exception.
+
 **Expected files or areas:** Authentication configuration; session handling; user and role persistence; server middleware or request guards; role seed/setup path.
 
 **Acceptance criteria:**
@@ -82,7 +84,7 @@ Phase 0 exit gate: a China warehouse user must complete the login/list and ten-i
 
 **Dependencies:** P0-03.
 
-**Risks:** Browser-visible role flags or client-only route hiding would create an authorization bypass. Account provisioning details remain an open decision.
+**Risks:** Browser-visible role flags or client-only route hiding would create an authorization bypass. Provisioning must remain idempotent and must not silently modify an existing role or password.
 
 ### P0-05: Establish the server permission boundary and safe response shapes
 
