@@ -50,6 +50,10 @@ Phase 0 exit gate: a China warehouse user must complete the login/list and ten-i
 
 **Objective:** Connect the approved relational database and introduce only the persistence needed for authenticated users, roles, upload-test records, and mock data.
 
+**P0-03 implementation decision:** PostgreSQL is accessed through Drizzle ORM and node-postgres. Local Docker Compose provides logically separate `cardflow_development` and `cardflow_test` databases. The test migration path resets only `TEST_DATABASE_URL`, then applies the committed SQL migration. Database connections used by the application are server-only and cached across development reloads.
+
+**Provisional schema decision:** `users` stores a provider-neutral account identifier, display name, and one persisted PostgreSQL enum role. `phase0_diagnostic_upload_sessions` and `phase0_diagnostic_upload_intents` are explicitly diagnostic structures, not authentication sessions or final media attachments. The intent table records client file metadata and has a unique `(session_id, idempotency_key)` constraint. Authentication identity linkage, final attachment targets and lifecycle, storage keys, upload finalization, cleanup policy, and automatic `updated_at` behavior remain deferred.
+
 **Expected files or areas:** Database connection configuration; migration tooling; initial migration(s); server data-access layer; local/test database configuration.
 
 **Acceptance criteria:**

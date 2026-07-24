@@ -52,6 +52,7 @@ Each phase must pass lint, typecheck, and tests. State-machine, permissions, and
 
 - Node.js 20.9 or later.
 - pnpm 10.34.5 or later.
+- Docker Desktop with Docker Compose for the local PostgreSQL databases.
 
 ### Install
 
@@ -86,11 +87,48 @@ pnpm test:watch
 cp .env.example .env.local
 ```
 
-P0-01 does not require runtime environment values. Database, authentication, object-storage, deployment, and final-region configuration remain deferred.
+P0-01 did not require runtime environment values. P0-03 adds local-only PostgreSQL connection values; authentication, object storage, deployment, and final-region choices remain deferred.
+
+### Local database
+
+Start the local PostgreSQL service and apply the development migration:
+
+```bash
+pnpm db:start
+pnpm db:migrate
+```
+
+Docker Compose creates separate `cardflow_development` and `cardflow_test` databases in one local-only PostgreSQL service. It uses trust authentication bound to `127.0.0.1` and must never be treated as a production configuration.
+
+Stop the service without deleting its local volume:
+
+```bash
+pnpm db:stop
+```
+
+The test database initialization SQL runs when Docker creates a fresh volume. To recreate both local databases from scratch, use `docker compose down -v` before `pnpm db:start`.
+
+### Migrations and database tests
+
+Generate a new migration only after an intentional schema change, then apply committed migrations with:
+
+```bash
+pnpm db:generate
+pnpm db:migrate
+pnpm db:migrate:test
+```
+
+`pnpm db:migrate:test` clears and recreates only the local database named by `TEST_DATABASE_URL`; it refuses a URL that is not clearly a test database or targets the same database as `DATABASE_URL`.
+
+Run PostgreSQL integration tests separately from the database-free unit test suite:
+
+```bash
+pnpm db:test
+```
 
 ### Continuous integration
 
-`.github/workflows/ci.yml` runs `pnpm lint`, `pnpm typecheck`, `pnpm test`, and `pnpm build` for pushes to `main` and pull requests targeting `main`.
+`.github/workflows/ci.yml` runs `pnpm lint`, `pnpm typecheck`, database-free `pnpm test`, a clean PostgreSQL test migration, `pnpm db:test`, and `pnpm build` for pushes to `main` and pull requests targeting `main`.
 
 ## Documentation
 

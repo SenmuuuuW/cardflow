@@ -1,5 +1,9 @@
 import path from "node:path";
-import { configDefaults, defineConfig } from "vitest/config";
+
+import { config as loadEnvironment } from "dotenv";
+import { defineConfig } from "vitest/config";
+
+loadEnvironment({ path: ".env.local" });
 
 export default defineConfig({
   resolve: {
@@ -10,6 +14,8 @@ export default defineConfig({
   },
   test: {
     environment: "node",
-    exclude: [...configDefaults.exclude, "src/**/*.database.test.ts"],
+    fileParallelism: false,
+    hookTimeout: 30_000,
+    include: ["src/**/*.database.test.ts"],
   },
 });
