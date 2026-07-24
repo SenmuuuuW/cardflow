@@ -9,21 +9,34 @@
     "lint": "eslint",
     "typecheck": "next typegen && tsc --noEmit",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "db:start": "docker compose up -d --wait",
+    "db:stop": "docker compose down",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "tsx scripts/db-migrate.ts",
+    "db:migrate:test": "tsx scripts/db-migrate.ts --test",
+    "db:test": "vitest run --config vitest.database.config.ts"
   },
   "dependencies": {
+    "drizzle-orm": "0.45.2",
     "next": "16.2.11",
+    "pg": "8.22.0",
     "react": "19.2.8",
-    "react-dom": "19.2.8"
+    "react-dom": "19.2.8",
+    "server-only": "0.0.1"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
+    "@types/pg": "8.20.0",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "dotenv": "17.4.2",
+    "drizzle-kit": "0.31.10",
     "eslint": "^9",
     "eslint-config-next": "16.2.11",
     "tailwindcss": "^4",
+    "tsx": "4.23.1",
     "typescript": "^5",
     "vitest": "^4.1.10"
   },
