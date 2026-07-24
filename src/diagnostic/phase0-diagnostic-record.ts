@@ -1,6 +1,9 @@
 import "server-only";
 
 import type { CardflowUserRole } from "@/auth/session";
+import type { phase0DiagnosticCurrencyValues } from "@/db/schema";
+
+export type Phase0DiagnosticCurrency = (typeof phase0DiagnosticCurrencyValues)[number];
 
 export type Phase0DiagnosticRawRecord = {
   id: string;
@@ -8,8 +11,7 @@ export type Phase0DiagnosticRawRecord = {
   expectedQuantity: number;
   statusLabel: string;
   purchaseCostCents: number;
-  purchaseCurrency: string;
-  internalProcurementReference: string;
+  purchaseCurrency: Phase0DiagnosticCurrency;
 };
 
 export type Phase0DiagnosticAdministratorRecord = {
@@ -18,7 +20,7 @@ export type Phase0DiagnosticAdministratorRecord = {
   expectedQuantity: number;
   statusLabel: string;
   purchaseCostCents: number;
-  purchaseCurrency: string;
+  purchaseCurrency: Phase0DiagnosticCurrency;
 };
 
 export type Phase0DiagnosticWarehouseRecord = {
@@ -26,17 +28,6 @@ export type Phase0DiagnosticWarehouseRecord = {
   itemLabel: string;
   expectedQuantity: number;
   statusLabel: string;
-};
-
-// This deterministic fixture is non-production Phase 0 diagnostic data, not a purchase-order model.
-export const phase0DiagnosticRawRecord: Phase0DiagnosticRawRecord = {
-  id: "phase0-diagnostic-record",
-  itemLabel: "Phase 0 diagnostic card record",
-  expectedQuantity: 1,
-  statusLabel: "Diagnostic only",
-  purchaseCostCents: 12_500,
-  purchaseCurrency: "USD",
-  internalProcurementReference: "phase0-internal-procurement-reference",
 };
 
 export function toPhase0DiagnosticAdministratorRecord(
@@ -65,11 +56,18 @@ export function toPhase0DiagnosticWarehouseRecord(
 
 export function toPhase0DiagnosticRecordForRole(
   role: CardflowUserRole,
-  record: Phase0DiagnosticRawRecord = phase0DiagnosticRawRecord,
+  record: Phase0DiagnosticRawRecord,
 ): Phase0DiagnosticAdministratorRecord | Phase0DiagnosticWarehouseRecord {
   if (role === "administrator") {
     return toPhase0DiagnosticAdministratorRecord(record);
   }
 
   return toPhase0DiagnosticWarehouseRecord(record);
+}
+
+export function toPhase0DiagnosticRecordsForRole(
+  role: CardflowUserRole,
+  records: readonly Phase0DiagnosticRawRecord[],
+): Array<Phase0DiagnosticAdministratorRecord | Phase0DiagnosticWarehouseRecord> {
+  return records.map((record) => toPhase0DiagnosticRecordForRole(role, record));
 }

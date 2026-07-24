@@ -7,16 +7,19 @@ import {
 } from "@/auth/authorization";
 
 import {
-  phase0DiagnosticRawRecord,
-  toPhase0DiagnosticRecordForRole,
+  toPhase0DiagnosticRecordsForRole,
 } from "./phase0-diagnostic-record";
+import {
+  listPhase0DiagnosticRecords,
+  type Phase0DiagnosticRecordReader,
+} from "./phase0-diagnostic-record-query";
 
 const protectedResponseHeaders = {
   "Cache-Control": "private, no-store, max-age=0",
 } as const;
 
 export type Phase0DiagnosticApi = {
-  getRecord: (request: Request) => Promise<Response>;
+  getRecords: (request: Request) => Promise<Response>;
   runAdministratorProbe: (request: Request) => Promise<Response>;
 };
 
@@ -32,15 +35,19 @@ function createAuthorizationErrorResponse(error: AuthorizationError): Response {
 
 export function createPhase0DiagnosticApi(
   authorization: ServerAuthorization = createServerAuthorization(),
+  diagnosticRecordReader: Phase0DiagnosticRecordReader = {
+    list: listPhase0DiagnosticRecords,
+  },
 ): Phase0DiagnosticApi {
   return {
-    async getRecord(request: Request): Promise<Response> {
+    async getRecords(request: Request): Promise<Response> {
       try {
         const user = await authorization.requireAuthenticatedUser(request.headers);
+        const records = await diagnosticRecordReader.list();
 
         return Response.json(
           {
-            record: toPhase0DiagnosticRecordForRole(user.role, phase0DiagnosticRawRecord),
+            records: toPhase0DiagnosticRecordsForRole(user.role, records),
           },
           { headers: protectedResponseHeaders },
         );

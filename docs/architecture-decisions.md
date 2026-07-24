@@ -4,7 +4,7 @@
 
 **Approved for Phase 0.**
 
-P0-01 authorizes the application foundation below. P0-03 adds the approved local PostgreSQL/Drizzle persistence foundation, and P0-04 selects Better Auth for the initial invitation-only authentication path. Object storage, deployment provider, final hosting region, and the final production schema remain deferred.
+P0-01 authorizes the application foundation below. P0-03 adds the approved local PostgreSQL/Drizzle persistence foundation, P0-04 selects Better Auth for the initial invitation-only authentication path, and P0-06 adds controlled diagnostic mock data. Object storage, deployment provider, final hosting region, and the final production schema remain deferred.
 
 ## Approved Phase 0 Technical Baseline
 
@@ -28,7 +28,13 @@ CardFlow remains invitation/provisioning-only: public sign-up is disabled, no pu
 
 Protected Phase 0 routes use one small server-only authorization layer over the P0-04 trusted session helper. It distinguishes unauthenticated (`401`) from authenticated-but-forbidden (`403`) requests without returning session, database, credential, or protected-record details. It accepts no client-provided role claim from browser state, query parameters, request bodies, headers, or cookies.
 
-The Phase 0 diagnostic record is a deterministic non-production fixture, not a purchase-order or final business record. Its raw server-only representation includes purchase-cost and internal procurement data. Response mappers construct administrator and China warehouse shapes explicitly: the administrator shape may contain the approved purchase-cost fields, while the warehouse shape is a literal allow-list that omits those fields completely, including from nested data and error responses. Protected diagnostic responses are non-cacheable. This boundary is covered with Better Auth and PostgreSQL-backed integration tests; no schema or CI change is required for P0-05.
+The Phase 0 diagnostic record is a deterministic non-production data shape, not a purchase-order or final business record. Response mappers construct administrator and China warehouse shapes explicitly: the administrator shape may contain the approved purchase-cost fields, while the warehouse shape is a literal allow-list that omits those fields completely, including from nested data and error responses. Protected diagnostic responses are non-cacheable. This boundary is covered with Better Auth and PostgreSQL-backed integration tests.
+
+## P0-06 Controlled Mock-Data Decision
+
+`phase0_diagnostic_records` stores three fixed synthetic diagnostic records behind a server-only explicit projection and the protected `GET /api/diagnostic/records` list. The table is provisional, non-operational, and may be removed or replaced after Phase 0. It uses stable IDs, basic quantity/cost constraints, and a narrow diagnostic-only currency enum; it has no purchase, inventory, shipment, or workflow foreign keys or states.
+
+The server-only seed command provisions the two initial roles through the existing idempotent provisioning service, reconciles only the fixed record IDs, and fails when a configured account has a conflicting persisted role or a fixed record ID is not seed-owned. Phase 0 seed-ownership ledgers record only accounts and records that the seed created. The reset command deletes only those owned users and their cascading Better Auth rows, plus owned deterministic diagnostic records; it preserves unrelated users and records and never drops schemas or volumes. Both commands refuse production-like environments and require a local development or test database URL. CI tests this behavior with isolated test credentials, so no real seed credentials are committed or configured in the workflow.
 
 ## Context
 
@@ -151,4 +157,4 @@ The guide does not supply enough evidence to make these choices now:
 
 ## Consequences of approval
 
-The baseline is approved through P0-04 for the application, quality-gate, persistence, and initial authentication foundations. Uploads and the China connectivity test remain separate Phase 0 tasks and must precede operational workflow development.
+The baseline is approved through P0-06 for the application, quality-gate, persistence, authentication, authorization, and controlled mock-data foundations. Uploads and the China connectivity test remain separate Phase 0 tasks and must precede operational workflow development.

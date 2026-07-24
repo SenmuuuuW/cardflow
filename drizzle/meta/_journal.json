@@ -15,6 +15,20 @@
       "when": 1784862543126,
       "tag": "0001_ancient_thena",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1784876304895,
+      "tag": "0002_bitter_maggott",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1784877398740,
+      "tag": "0003_chemical_ravenous",
+      "breakpoints": true
     }
   ]
 }

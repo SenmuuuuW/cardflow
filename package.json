@@ -16,6 +16,8 @@
     "db:migrate": "tsx scripts/db-migrate.ts",
     "db:migrate:test": "tsx scripts/db-migrate.ts --test",
     "db:test": "vitest run --config vitest.database.config.ts",
+    "db:seed:phase0": "node --conditions=react-server --import tsx scripts/db-seed-phase0.ts",
+    "db:reset:phase0": "node --conditions=react-server --import tsx scripts/db-reset-phase0.ts",
     "provision:phase0-user": "node --conditions=react-server --import tsx scripts/provision-phase0-user.ts"
   },
   "dependencies": {
